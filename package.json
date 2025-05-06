@@ -1,0 +1,29 @@
+{
+  "name": "mcp-camera-service",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:stdio": "npm run build && node dist/index.js stdio",
+    "start:http": "npm run build && node dist/index.js http",
+    "start:sse": "npm run build && node dist/index.js sse",
+    "dev": "ts-node src/index.ts stdio"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.11.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "ffmpeg-static": "^5.1.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "mcp-camera-service": "file:",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.1",
+    "@types/node": "^20.0.0",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.0.0"
+  }
+}

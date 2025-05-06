@@ -1,0 +1,14 @@
+# Node.js
+node_modules/
+
+# 日志
+*.log
+# 临时文件
+temp/
+
+# 编译输出
+dist/
+build/
+
+# 环境变量
+.env
