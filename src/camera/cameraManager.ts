@@ -43,7 +43,7 @@ const videoContexts = new Map<string, VideoContext>();
 let cameraNameMap: string[] = [];
 
 // 推流参数缓存
-const streamParamsMap = new Map<string, { cameraID: number | string, duration?: number, isConsumed: boolean }>();
+const streamParamsMap = new Map<string, { cameraID: number | string, duration?: number }>();
 
 const STREAM_URL_EXPIRE_MS = process.env.STREAM_URL_EXPIRE_MS ? parseInt(process.env.STREAM_URL_EXPIRE_MS, 10) : 5 * 60 * 1000; // ms, 默认5分钟
 const streamTimeouts = new Map<string, NodeJS.Timeout>();
@@ -177,8 +177,7 @@ export class CameraManager {
 
   static createStreamProcess(videoID: string) {
     const params = streamParamsMap.get(videoID);
-    if (!params || params.isConsumed) return undefined;
-    params.isConsumed = true; // 标记为已消费
+    if (!params) return undefined;
     const { cameraID, duration } = params;
     const platform = os.platform();
     const realName = this.getCameraNameByID(cameraID);
@@ -207,7 +206,7 @@ export class CameraManager {
       const videoID = randomUUID();
       if (!absPath) {
         // 延迟推流：只记录参数，返回 streamUrl
-        streamParamsMap.set(videoID, { cameraID, duration, isConsumed: false });
+        streamParamsMap.set(videoID, { cameraID, duration});
         // 设置超时自动清理
         const timeout = setTimeout(() => this.clearStreamParams(videoID), STREAM_URL_EXPIRE_MS);
         streamTimeouts.set(videoID, timeout);
@@ -262,17 +261,6 @@ export class CameraManager {
   }
 
   static async stopVideo(videoID: string): Promise<VideoResult> {
-    // 先检查是否是stream模式
-    const streamParams = this.getStreamParams(videoID);
-    if (streamParams) {
-      // 清理stream相关资源
-      this.clearStreamParams(videoID);
-      return {
-        success: true,
-        message: '推流已停止'
-      };
-    }
-
     const ctx = videoContexts.get(videoID);
     if (!ctx) {
       return { success: false, message: '未找到录像上下文', error: '无效videoID' };

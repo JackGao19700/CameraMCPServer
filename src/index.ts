@@ -69,10 +69,6 @@ function startHttpExpressServer(server: McpServer) {
       res.status(404).send('Stream not found or expired');
       return;
     }
-    if (params.isConsumed) {
-      res.status(403).send('Stream has already been consumed');
-      return;
-    }
     // 启动 ffmpeg 进程
     const proc = CameraManager.createStreamProcess(videoID);
     if (!proc || !proc.stdout) {
