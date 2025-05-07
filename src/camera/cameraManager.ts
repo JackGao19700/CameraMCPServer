@@ -9,21 +9,12 @@ import { spawn, ChildProcessWithoutNullStreams, ChildProcessByStdio } from 'chil
 import winston from 'winston';
 import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
+import { logger } from '../utils/logger.js';
 
 // 视频流参数配置
 const VIDEO_BITRATE = process.env.VIDEO_BITRATE || '800k';
 const VIDEO_FPS = process.env.VIDEO_FPS ? parseInt(process.env.VIDEO_FPS, 10) : 25;
 const VIDEO_RESOLUTION = process.env.VIDEO_RESOLUTION || '640x480';
-
-// 日志
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.simple()
-  ),
-  transports: [new winston.transports.Console()]
-});
 
 const FINISHED_VIDEO_CLEAN_SPAN_SECOND = process.env.FINISHED_VIDEO_CLEAN_SPAN_SECOND ? parseInt(process.env.FINISHED_VIDEO_CLEAN_SPAN_SECOND, 10) : 1800; // 秒
 

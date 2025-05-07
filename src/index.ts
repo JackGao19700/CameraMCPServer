@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
-import winston from 'winston';
 import { randomUUID } from 'crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -10,27 +9,12 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registerCameraTools } from './mcp/tools.js';
 import { CameraManager } from './camera/cameraManager.js';
+import { logger } from './utils/logger.js';
 
 // 环境变量
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 const MCP_SERVER_NAME = process.env.MCP_SERVER_NAME || 'mcp-camera-server';
 const MCP_SERVER_VERSION = process.env.MCP_SERVER_VERSION || '1.0.0';
-const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
-const LOG_FILEPATH = process.env.LOG_FILEPATH;
-
-// 日志
-const loggerTransports: winston.transport[] = [new winston.transports.Console()];
-if (LOG_FILEPATH) {
-  loggerTransports.push(new winston.transports.File({ filename: LOG_FILEPATH }));
-}
-const logger = winston.createLogger({
-  level: LOG_LEVEL,
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.simple()
-  ),
-  transports: loggerTransports
-});
 
 // MCP Server
 const server = new McpServer({
@@ -125,7 +109,7 @@ function startHttpExpressServer(server: McpServer) {
 }
 
 // 启动模式分发
-const mode = (process.argv[2] as 'stdio' | 'http' | 'sse') || 'http';
+const mode = (process.argv[2] as 'stdio' | 'http' | 'sse') || 'stdio';
 
 // 先初始化摄像头映射表，再启动服务
 CameraManager.initialize().then(() => {
