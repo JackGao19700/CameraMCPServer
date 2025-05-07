@@ -58,97 +58,74 @@ STREAM_URL_EXPIRE_MS=300000
 
 ## 主要 MCP 工具接口
 
-- **listCameras**：枚举所有可用摄像头
-- **takePhoto**：拍照并保存为文件
-- **startVideo**：启动录像（可保存为文件或推流）
-- **stopVideo**：停止录像
+### 1. listCameras - 枚举摄像头
+功能说明: 列出所有可用的摄像头设备
 
-> **注意：所有 curl 示例必须加 Accept: application/json, text/event-stream 头，否则会被服务端拒绝（MCP 官方协议要求）。**
+输入参数: 无
 
-### 1. listCameras
-#### Windows CMD/PowerShell
-```bash
-curl -X POST http://localhost:3001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"call\",\"params\":{\"tool\":\"listCameras\",\"arguments\":{}}}"
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-#### Linux/macOS
-```bash
-curl -X POST http://localhost:3001/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"call","params":{"tool":"listCameras","arguments":{}}}'
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-返回示例：
-```json
-{
-  "result": {
-    "success": true,
-    "cameras": [
-      { "cameraID": 1, "name": "1080P USB Camera", "description": "1080P USB Camera" }
-    ]
-  }
-}
-```
+输出参数:
+- cameras: 摄像头列表
+  - cameraID: 摄像头编号
+  - name: 设备名称
+  - description: 设备描述
 
-### 2. takePhoto
-#### Windows
-```bash
-curl -X POST http://localhost:3001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"call\",\"params\":{\"tool\":\"takePhoto\",\"arguments\":{\"cameraID\":1,\"filepath\":\"photos\"}}}"
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-#### Linux/macOS
-```bash
-curl -X POST http://localhost:3001/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"call","params":{"tool":"takePhoto","arguments":{"cameraID":1,"filepath":"photos"}}}'
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-返回：图片文件路径
+### 2. takePhoto - 拍照功能
+功能说明: 从指定摄像头拍摄照片并保存
 
-### 3. startVideo（文件保存模式）
-#### Windows
-```bash
-curl -X POST http://localhost:3001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"call\",\"params\":{\"tool\":\"startVideo\",\"arguments\":{\"cameraID\":1,\"filepath\":\"videos\",\"duration\":100}}}"
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-#### Linux/macOS
-```bash
-curl -X POST http://localhost:3001/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"call","params":{"tool":"startVideo","arguments":{"cameraID":1,"filepath":"videos","duration":100}}}'
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-返回：视频文件路径、videoID
+输入参数:
+- cameraID: 摄像头编号
+- filepath: 照片保存目录路径
 
-### 4. stopVideo
-#### Windows
-```bash
-curl -X POST http://localhost:3001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"call\",\"params\":{\"tool\":\"stopVideo\",\"arguments\":{\"videoID\":\"xxxx-xxxx-xxxx\"}}}"
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-#### Linux/macOS
-```bash
-curl -X POST http://localhost:3001/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"call","params":{"tool":"stopVideo","arguments":{"videoID":"xxxx-xxxx-xxxx"}}}'
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
+输出参数:
+- success: 操作是否成功
+- imagePath: 照片保存路径(成功时返回)
+- error: 错误信息(失败时返回)
 
-### 5. startVideo（推流模式，streamUrl）
-#### Windows
-```bash
-curl -X POST http://localhost:3001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"call\",\"params\":{\"tool\":\"startVideo\",\"arguments\":{\"cameraID\":1}}}"
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-#### Linux/macOS
-```bash
-curl -X POST http://localhost:3001/mcp -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"call","params":{"tool":"startVideo","arguments":{"cameraID":1}}}'
-```
-# 注意：body 必须为 JSON-RPC 2.0 格式
-返回：
-```json
-{
-  "result": {
-    "success": true,
-    "videoID": "xxxx-xxxx-xxxx",
-    "streamUrl": "/video/stream?videoID=xxxx-xxxx-xxxx"
-  }
-}
-```
+### 3. startVideo - 开始录像/推流
+功能说明: 启动视频录制或实时推流
+
+输入参数:
+- cameraID: 摄像头编号
+- filepath: 录像文件保存路径(可选，不传则启动推流模式)
+- duration: 录像时长(毫秒，可选)
+
+输出参数(文件模式):
+- success: 操作是否成功
+- videoPath: 视频文件路径
+- videoID: 录像会话ID
+
+输出参数(推流模式):
+- success: 操作是否成功
+- videoID: 录像会话ID
+- streamUrl: 推流访问地址
+
+### 4. stopVideo - 停止录像/推流
+功能说明: 停止正在进行的录像或推流
+
+输入参数:
+- videoID: 录像会话ID(startVideo返回)
+
+输出参数:
+- success: 操作是否成功
+- message: 操作结果消息
+- videoPath: 视频文件路径(文件模式时存在)
+- error: 错误信息(失败时返回)
 
 ---
+
+## MCP 工具接口测试方法
+- 下载本仓库后,进入仓库根目录`cd myCameraNodejs`
+- 使用`npm link .` 链接为全局命令
+- 请通过`npx modelcontextprotocol/inspector`启动modelcontextprotocol/inspector进行测试：
+![img](./doc/inspector.png)
+
+  在界面中:
+  - `Transport Type`: 选择`STDIO`
+  - `Command`: 选择`npx`
+  - `Arguments`: 输入`mcp-camera-server`
+
+点击`Connect`按钮，即可连接到摄像头服务。
+如果通过`npx run start:sse`启动服务，`URL`填入`http://127.0.0.1:3001/sse`(注意3001由.env中PORT指定)
 
 ## 视频流测试方法
 

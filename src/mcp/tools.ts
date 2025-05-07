@@ -18,6 +18,7 @@ export function registerCameraTools(server: McpServer) {
   // listCameras
   server.tool(
     'listCameras',
+    'List all cameres on the system.',
     {},
     async () => {
       const cameras = await CameraManager.listCameras();
@@ -31,6 +32,7 @@ export function registerCameraTools(server: McpServer) {
   // takePhoto
   server.tool(
     'takePhoto',
+    'Take a photo from a camera and save on specified path.',
     {
       cameraID: z.number(),
       filepath: z.string()
@@ -53,6 +55,7 @@ export function registerCameraTools(server: McpServer) {
   // startVideo
   server.tool(
     'startVideo',
+    'Start a video from a camera and save on specified path or later get in a stream.',
     {
       cameraID: z.number(),
       filepath: z.string().optional(),
@@ -85,6 +88,7 @@ export function registerCameraTools(server: McpServer) {
   // stopVideo
   server.tool(
     'stopVideo',
+    'Stop a video from a camera.',
     {
       videoID: z.string()
     },

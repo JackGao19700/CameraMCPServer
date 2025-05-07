@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
+    "mcp-camera-service": "file:",
     "winston": "^3.10.0"
   },
   "devDependencies": {
