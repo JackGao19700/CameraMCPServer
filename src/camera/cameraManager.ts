@@ -197,7 +197,23 @@ export class CameraManager {
     args.push('-f', 'mpegts', '-codec:v', 'mpeg1video', '-b:v', VIDEO_BITRATE, '-r', VIDEO_FPS.toString(), '-s', VIDEO_RESOLUTION, '-');
     const ffmpegBin = typeof ffmpegPath === 'string' ? ffmpegPath : 'ffmpeg';
     const proc = spawn(ffmpegBin, args, { stdio: ['ignore', 'pipe', 'pipe'] });
-    proc.on('exit', () => this.clearStreamParams(videoID));
+    let exitResolve: () => void;
+    const exitPromise = new Promise<void>((resolve) => {
+      exitResolve = resolve;
+    });
+    const ctx: VideoContext = {
+      videoID, cameraID: String(cameraID), proc, stopped: false, exitPromise
+    };
+    videoContexts.set(videoID, ctx);
+    logger.info(`开始推流: ${realName} (videoID=${videoID}, duration=${duration})`);
+    if (proc.stderr) proc.stderr.on('data', (data) => logger.debug(`[ffmpeg] ${data}`));
+    proc.on('exit', (code) => {
+      logger.info(`推流进程退出: ${realName}, code=${code}, videoID=${videoID}`);
+      ctx.stopped = true;
+      exitResolve();
+      this.clearStreamParams(videoID);
+      scheduleVideoContextCleanup(videoID);
+    });
     return proc;
   }
 
@@ -275,8 +291,8 @@ export class CameraManager {
           logger.info(`停止录像: ${ctx.cameraID}, videoID=${videoID}`);
           resolve({
             success: true,
-            message: '录像已停止',
-            videoPath: ctx.absPath
+            message: ctx.absPath ? '录像已停止' : '推流已停止',
+            ...(ctx.absPath ? { videoPath: ctx.absPath } : {})
           });
         });
         // 优雅退出：优先用 'q'，否则 SIGINT
@@ -295,8 +311,8 @@ export class CameraManager {
       logger.info(`录像已自动停止: ${ctx.cameraID}, videoID=${videoID}`);
       return {
         success: true,
-        message: '录像已停止',
-        videoPath: ctx.absPath
+        message: ctx.absPath ? '录像已停止' : '推流已停止',
+        ...(ctx.absPath ? { videoPath: ctx.absPath } : {})
       };
     }
   }
