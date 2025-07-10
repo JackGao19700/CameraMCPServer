@@ -174,4 +174,6 @@ ffmpeg -i "http://localhost:3001/video/stream?videoID=xxxx-xxxx-xxxx" -c copy ou
 - 支持 Windows/Linux，自动适配 dshow/v4l2
 - 支持 MCP stdio/http/sse 多种模式
 
-如有更多问题或需求，欢迎 issue 或联系Jackgao19700@qq.com。
+如有更多问题或需求，欢迎 issue 或联系Jackgao19700@qq.com or gaoshengqiang19700@gmail.com
+
+it is certified by MCPHub. You can get it from https://mcphub.com/mcp-servers/jackgao19700/cameramcpserver.
